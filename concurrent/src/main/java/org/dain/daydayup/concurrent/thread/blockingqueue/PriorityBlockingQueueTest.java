@@ -2,7 +2,6 @@ package org.dain.daydayup.concurrent.thread.blockingqueue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class PriorityBlockingQueueTest {
@@ -10,6 +9,7 @@ public class PriorityBlockingQueueTest {
 	private final static PriorityBlockingQueue<PriorityNode> queue = new PriorityBlockingQueue<>();
 
 	public static void main(String[] args) throws InterruptedException {
+
 		PriorityNode n1 = new PriorityNode(1, "11");
 		PriorityNode n2 = new PriorityNode(2, "22");
 		PriorityNode n3 = new PriorityNode(3, "33");
@@ -17,7 +17,7 @@ public class PriorityBlockingQueueTest {
 		PriorityNode n5 = new PriorityNode(5, "55");
 		PriorityNode n6 = new PriorityNode(6, "66");
 		PriorityNode n7 = new PriorityNode(6, "666");
-		
+
 		new Thread(()->{
 			queue.add(n5);
 		}).start();
@@ -39,12 +39,6 @@ public class PriorityBlockingQueueTest {
 			System.out.println("大小："+resList.size());
 			System.out.println(res.getName());
 		}
-//
-//		while (!queue.isEmpty()) {
-//			System.out.println(queue.take().getName());
-//			System.out.println(queue.toString());
-//		}
-
 	}
 }
 

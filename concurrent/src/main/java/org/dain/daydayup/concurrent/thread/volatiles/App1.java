@@ -9,7 +9,7 @@ public class App1 {
 		//1 先启动t2,让循环走起来
 		t2.start();
 		Thread.sleep(1000);
-		//2 然后启动t2线程，改变boolean变量a,以便停止循环
+		//2 然后启动t2线程，改变boolean变量b,以便停止循环
 		t1.start();
 	}
 }
@@ -46,7 +46,8 @@ class Task2 implements Runnable {
 
 class MyTest {
 	private int a = 0;
-//	private boolean b = false;
+	// 如果变量b不定义为volatile，则线程t2使用线程内的工作内存中的值，
+	// 不从主存中取最新的b的值，导致循环一直不结束
 	private volatile boolean b = false;
 
 	public void method1() {
@@ -58,16 +59,6 @@ class MyTest {
 
 	public void method2() {
 		while (!b) {// 3
-//			flag=b;
-//			int i = a;// 4
-//			System.out.println("method2--Thread:" + 
-//			Thread.currentThread().getName() + "forerver.a=" + a+",b="+b);
-//			try {
-//				Thread.sleep(1);
-//			} catch (InterruptedException e) {
-////				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 		}
 
 	}
