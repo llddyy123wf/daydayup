@@ -1,5 +1,7 @@
 package org.dain.daydayup.concurrent.thread.blockingqueue;
 
+import javax.swing.plaf.TableHeaderUI;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
@@ -12,38 +14,68 @@ import java.util.concurrent.TimeUnit;
  */
 public class DelayQueueTest {
 
-    public static void main(String[] args) {
+    private static CountDownLatch cdl = new CountDownLatch(3);
+    public static void main(String[] args) throws InterruptedException {
         ClockWorker worker = new ClockWorker();
         worker.start();
+        Thread t1 = new Thread(() -> {
+            //5秒后，叫醒dain1
+            DelayClockEntity clock1 = new DelayClockEntity("dain1", System.currentTimeMillis() + 1000 * 5L);
+            worker.addCustomClock(clock1);
+            cdl.countDown();
+        });
+        Thread t2 = new Thread(() -> {
+            //10秒后，叫醒dain2
+            DelayClockEntity clock2 = new DelayClockEntity("dain2", System.currentTimeMillis() + 1000 * 10L);
+            worker.addCustomClock(clock2);
+            cdl.countDown();
+        });
+        Thread t3 = new Thread(() -> {
+            //15秒后，叫醒dain3
+            DelayClockEntity clock3 = new DelayClockEntity("dain3", System.currentTimeMillis() + 1000 * 15L);
+            worker.addCustomClock(clock3);
+            cdl.countDown();
+        });
+        t1.start();
+        t2.start();
+        t3.start();
 
-        //2秒后，叫醒dain1
-        DelayClockEntity clock1 = new DelayClockEntity("dain1", System.currentTimeMillis() + 1000 * 2L);
-        //5秒后，叫醒dain2
-        DelayClockEntity clock2 = new DelayClockEntity("dain2", System.currentTimeMillis() + 1000 * 5L);
-        worker.addCustomClock(clock1);
-        worker.addCustomClock(clock2);
+        cdl.await();
         System.out.println("已成功添加进队列,time=" + System.currentTimeMillis());
+
+        System.out.println("当前队列数量为："+worker.getDelayQueue().size());
+        DelayClockEntity entity = worker.getDelayQueue().poll();
+        //试试看能不能拿到队列的数量
+        if (entity==null){
+            System.out.println("是否能立即取到队列的数据：NO");
+        }
+
     }
 
 }
 
-class ClockWorker extends Thread{
+class ClockWorker extends Thread {
     private DelayQueue<DelayClockEntity> delayQueue = new DelayQueue();
 
-    public void addCustomClock(DelayClockEntity delayClock){
+    public void addCustomClock(DelayClockEntity delayClock) {
         this.delayQueue.put(delayClock);
-        System.out.println("now delayQueue.size="+delayQueue.size());
+        System.out.println("now delayQueue.size=" + delayQueue.size());
+    }
+
+    public DelayQueue<DelayClockEntity>  getDelayQueue(){
+        return delayQueue;
     }
 
     @Override
     public void run() {
-        while (true ) {
+        while (true) {
             try {
+                System.out.println("队列数量剩余："+delayQueue.size());
                 //如果没有取到数据，则等待
                 DelayClockEntity pollClock = delayQueue.take();
                 System.out.println("dear " + pollClock.getName() + ",it's time to go to bed now. time=" +
                         System.currentTimeMillis());
-                if (delayQueue.size()==0){
+                if (delayQueue.size() == 0) {
                     break;
                 }
             } catch (InterruptedException e) {
