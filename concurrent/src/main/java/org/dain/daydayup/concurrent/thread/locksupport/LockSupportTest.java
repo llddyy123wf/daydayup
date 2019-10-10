@@ -1,5 +1,10 @@
 package org.dain.daydayup.concurrent.thread.locksupport;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -16,9 +21,37 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class LockSupportTest {
     public static void main(String[] args) throws InterruptedException {
-        Thread t1 = new Thread(()->{
-            int sum=0;
-            for (int i=0;i<10;i++){
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 3, 10,
+                TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10));
+        for (int i=0;i<2000;i++){
+            int finalI = i;
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println(Thread.currentThread().getName()+" is Running...");
+                    if (finalI ==1000){
+                        System.out.println("sssss");
+                    }
+//                    try {
+//                        Thread.sleep(3000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+                }
+            });
+        }
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("aa", 1);
+        hashMap.put(null, null);
+        System.out.println(hashMap.get("aa"));
+        HashSet<Object> hashSet = new HashSet<>();
+        hashSet.add(hashMap);
+        hashSet.add(null);
+        System.out.println(hashSet.size());
+
+        Thread t1 = new Thread(() -> {
+            int sum = 0;
+            for (int i = 0; i < 10; i++) {
                 sum++;
             }
             try {
@@ -27,7 +60,7 @@ public class LockSupportTest {
                 e.printStackTrace();
             }
             LockSupport.park();
-            System.out.println("最终结果："+sum);
+            System.out.println("最终结果：" + sum);
         });
         t1.start();
         Thread.sleep(3000);
